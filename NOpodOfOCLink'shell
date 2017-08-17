@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# if which oclint 2>/dev/null; then
+#     echo 'oclint exist'
+# else
+#     brew tap oclint/formulae
+#     brew install oclint
+# fi
+# if which xcpretty 2>/dev/null; then
+#     echo 'xcpretty exist'
+# else
+#     gem install xcpretty
+# fi
+
+
+cd /Users/xingl/Desktop/Test
+# myworkspace=haha.xcworkspace # 替换workspace的名字
+myscheme=Test # 替换scheme的名字
+xcodebuild -scheme $myscheme clean&&
+xcodebuild -scheme $myscheme \
+-configuration Debug \
+| xcpretty -r json-compilation-database -o compile_commands.json
+
+if [ -f ./compile_commands.json ]; then echo '-----编译数据生成完毕-----'
+else echo "-----生成编译数据失败-----"; fi
+
+# 生成报表
+oclint-json-compilation-database -e Pods -- \
+-report-type html -o oclint_result.html \
+-rc LONG_LINE=200 \
+-max-priority-1=100000 \
+-max-priority-2=100000 \
+-max-priority-3=100000; \
+rm compile_commands.json;
+if [ -f ./oclint_result.html ]; then echo '-----分析完毕-----'
+else echo "-----分析失败-----"; fi
